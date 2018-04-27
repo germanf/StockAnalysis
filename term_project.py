@@ -416,10 +416,10 @@ print (json.dumps(sdata,indent = 1))
 
 """
 searched = "$SQ"
-r = twitter_search(twitter_api, searched, max_results= 1000, result_type = 'mixed', lang = 'en', since= "2018-4-9", until="2018-4-10", tweet_mode="extended" )
+r = twitter_search(twitter_api, searched, max_results= 1000, result_type = 'mixed', lang = 'en', since= "2018-4-21", until="2018-4-22", tweet_mode="extended" )
 
 
-with open(searched+".txt", 'a+') as f:
+with open(searched+".txt", 'w+') as f:
     for x in r:
         if ('full_text' in x.keys()):
 
@@ -455,7 +455,7 @@ test_set = sentim_analyzer.apply_features(testing_docs)
 trainer = NaiveBayesClassifier.train
 classifier = sentim_analyzer.train(trainer, training_set)
 """
-#nltk.download('punkt')
+nltk.download('punkt')
 
 try:
     sid = SentimentIntensityAnalyzer()

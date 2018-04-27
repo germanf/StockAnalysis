@@ -3,7 +3,6 @@ import json
 import sys
 import time
 from urllib2 import URLError
-import matplotlib.pyplot as plt
 from httplib import BadStatusLine
 from prettytable import PrettyTable
 from yahoo_finance import Share
@@ -415,10 +414,34 @@ sdata = rep.json()
 print (json.dumps(sdata,indent = 1))
 
 """
+def havest_user_stock_tweet(stock_name,user_name,result_limit):
+
+	time_of_tweet=""
+	stock_tweets = harvest_user_timeline(twitter_api, screen_name=user_name,max_results=result_limit,)
+	### open file and test output
+	for x in stock_tweets:
+		if ('full_text' in x.keys()):
+			if(key_word in x['full_text']):
+				time=x['created_at']
+				time_of_tweet=time[4:11]+time[len-4:len]
+				with open(time_of_tweet + ".txt", 'a+') as k:
+				    k.write("text: " + x['full_text'].encode('utf-8') + "\n")
+		else:
+			if(key_word in x['text']):
+				time = x['created_at']
+				time_of_tweet = time[4:11] + time[len(time) - 4:len(time)]
+				with open(time_of_tweet + ".txt", 'a+') as k:
+				    k.write("text: " + x['text'].encode('utf-8') + "\n")
+user_name="HIDEO_KOJIMA_EN"
+result_limit=200
+key_word="DEATH STRANDING"
+havest_user_stock_tweet(key_word,user_name,result_limit)
 searched = "$SQ"
-r = twitter_search(twitter_api, searched, max_results= 1000, result_type = 'mixed', lang = 'en', since= "2018-4-21", until="2018-4-22", tweet_mode="extended" )
+r = twitter_search(twitter_api, searched, max_results= 1000, result_type = 'mixed', lang = 'en', since= "2018-4-23", until="2018-4-24", tweet_mode="extended" )
 
 
+
+### open file and out put.
 with open(searched+".txt", 'w+') as f:
     for x in r:
         if ('full_text' in x.keys()):
@@ -428,6 +451,7 @@ with open(searched+".txt", 'w+') as f:
             f.write("text: " + x['text'].encode('utf-8')+ "\n")
         f.write("time: " + x['created_at'].encode('utf-8') + "\n")
         
+
 
 """
 
@@ -489,3 +513,7 @@ print ("neg: ", neg)
 fig = plt.figure()
 plt.show()
 """
+'''
+input: a user name
+output: text\n time\n
+'''

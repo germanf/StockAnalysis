@@ -15,6 +15,10 @@ from nltk.sentiment.util import *
 from nltk import tokenize
 import nltk
 import codecs
+import stock
+import predict
+import math
+
 
 
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -414,8 +418,7 @@ sdata = rep.json()
 print (json.dumps(sdata,indent = 1))
 
 """
-def havest_user_stock_tweet(stock_name,user_name,result_limit):
-
+def havest_user_stock_tweet(stock_name,user_name,result_limit, key_word):
 	time_of_tweet=""
 	stock_tweets = harvest_user_timeline(twitter_api, screen_name=user_name,max_results=result_limit,)
 	### open file and test output
@@ -432,24 +435,30 @@ def havest_user_stock_tweet(stock_name,user_name,result_limit):
 				time_of_tweet = time[4:11] + time[len(time) - 4:len(time)]
 				with open(time_of_tweet + ".txt", 'a+') as k:
 				    k.write("text: " + x['text'].encode('utf-8') + "\n")
+"""
 user_name="HIDEO_KOJIMA_EN"
 result_limit=200
 key_word="DEATH STRANDING"
 havest_user_stock_tweet(key_word,user_name,result_limit)
-searched = "$SQ"
-r = twitter_search(twitter_api, searched, max_results= 1000, result_type = 'mixed', lang = 'en', since= "2018-4-23", until="2018-4-24", tweet_mode="extended" )
+"""
+def search_stock_tweets(twitter_api, searched, max_results, since, until):
+    r = twitter_search(twitter_api, "$" + searched, max_results= max_results, result_type = 'mixed', lang = 'en', since= since, until= until, tweet_mode="extended" )
+    with open(searched + ".txt", 'w+') as f:
+        for x in r:
+            if ('full_text' in x.keys()):
+
+                f.write("text: " + x['full_text'].encode('utf-8') + "\n")
+            else:
+                f.write("text: " + x['text'].encode('utf-8') + "\n")
+            f.write("time: " + x['created_at'].encode('utf-8') + "\n")
 
 
 
 ### open file and out put.
-with open(searched+".txt", 'w+') as f:
-    for x in r:
-        if ('full_text' in x.keys()):
 
-            f.write("text: " + x['full_text'].encode('utf-8')+ "\n")
-        else:
-            f.write("text: " + x['text'].encode('utf-8')+ "\n")
-        f.write("time: " + x['created_at'].encode('utf-8') + "\n")
+"""
+
+"""
         
 
 
@@ -479,32 +488,59 @@ test_set = sentim_analyzer.apply_features(testing_docs)
 trainer = NaiveBayesClassifier.train
 classifier = sentim_analyzer.train(trainer, training_set)
 """
-nltk.download('punkt')
 
-try:
-    sid = SentimentIntensityAnalyzer()
-except:
-    nltk.download('vader_lexicon')
+def analyze(searched, date):
+    nltk.download('punkt')
 
-    sid = SentimentIntensityAnalyzer()
-sentence_list = []
-f= codecs.open(searched+'.txt', encoding='utf-8')
-for line in f:
-    if(line.startswith("text:")):
-        sentence_list.extend(tokenize.sent_tokenize(line))
-f.close()
-pos = 0
-neg = 0
-for sentece in sentence_list:
-    ss = sid.polarity_scores(sentece)
-    if (ss['compound'] > 0.0):
-        pos += ss['compound']
-    if (ss['compound'] < 0.0):
-        neg += ss['compound']
-    print (ss)
-print ("pos: ", pos)
-print ("neg: ", neg)
+    try:
+        sid = SentimentIntensityAnalyzer()
+    except:
+        nltk.download('vader_lexicon')
 
+        sid = SentimentIntensityAnalyzer()
+    sentence_list = []
+    f= codecs.open(searched+'.txt', encoding='utf-8')
+    for line in f:
+        if(line.startswith("text:")):
+            sentence_list.extend(tokenize.sent_tokenize(line))
+    f.close()
+    pos = 0
+    neg = 0
+    count = 0
+    for sentence in sentence_list:
+        count += 1
+        ss = sid.polarity_scores(sentence)
+        if (ss['compound'] > 0.0):
+            pos += ss['compound']
+        if (ss['compound'] < 0.0):
+            neg += ss['compound']
+        print (ss)
+    print ("pos: ", pos)
+    print ("neg: ", neg)
+    ratio = pos/(neg if neg != 0 else 0.001) if pos > neg else (neg/(pos if pos != 0 else 0.001))*-1
+    trainFeature = {}
+    trainFeature["ratio"] = math.fabs(ratio)
+    trainFeature["count"] = count
+    change = stock.GetPriceChangeOnDate(searched, date)
+    print ("change: ", change)
+    trainFeature["label"] = 1 if change > 0 else 0
+    priceChangedOverFiveDays = stock.GetPriceChangedOverFiveDays(searched, date)
+    simple_predict_result = predict.SimplePredict("simplePredict.sav", priceChangedOverFiveDays) - 0.5
+    trainFeature["simplePredictResult"] = simple_predict_result
+
+    with open('trainingSetWithSentiment2.txt', 'a+') as out:
+        json.dump(trainFeature, out)
+        out.write("\n")
+
+
+def train (symbol):
+    search_stock_tweets(twitter_api, symbol, 1000, "2018-4-23", "2018-4-26")
+    analyze( symbol, "2018-04-27")
+
+symbolsList = stock.GetSymbolsList()[:50]
+print(symbolsList)
+for i in symbolsList:
+    train(i)
 
 #for key,value in sorted(sentim_analyzer.evaluate(test_set).items()):
 #    print('{0}: {1}'.format(key, value))

@@ -490,7 +490,10 @@ classifier = sentim_analyzer.train(trainer, training_set)
 """
 
 def analyze(searched, date):
-    nltk.download('punkt')
+    try:
+        tokenize.sent_tokenize("")
+    except:
+        nltk.download('punkt')
 
     try:
         sid = SentimentIntensityAnalyzer()
@@ -514,15 +517,15 @@ def analyze(searched, date):
             pos += ss['compound']
         if (ss['compound'] < 0.0):
             neg += ss['compound']
-        print (ss)
-    print ("pos: ", pos)
-    print ("neg: ", neg)
+        #print (ss)
+    #print ("pos: ", pos)
+    #print ("neg: ", neg)
     ratio = pos/(neg if neg != 0 else 0.001) if pos > neg else (neg/(pos if pos != 0 else 0.001))*-1
     trainFeature = {}
     trainFeature["ratio"] = math.fabs(ratio)
     trainFeature["count"] = count
     change = stock.GetPriceChangeOnDate(searched, date)
-    print ("change: ", change)
+    #print ("change: ", change)
     trainFeature["label"] = 1 if change > 0 else 0
     priceChangedOverFiveDays = stock.GetPriceChangedOverFiveDays(searched, date)
     simple_predict_result = predict.SimplePredict("simplePredict.sav", priceChangedOverFiveDays) - 0.5
@@ -537,7 +540,7 @@ def train (symbol):
     search_stock_tweets(twitter_api, symbol, 1000, "2018-4-23", "2018-4-26")
     analyze( symbol, "2018-04-27")
 
-symbolsList = stock.GetSymbolsList()[:50]
+symbolsList = stock.GetSymbolsList()[150:200]
 print(symbolsList)
 for i in symbolsList:
     train(i)

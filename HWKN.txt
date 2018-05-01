@@ -1,0 +1,8 @@
+text: Stocks near strong wedge-down pattern: $HWKN, $FSIC, $HUD, $WCC
+time: Wed Apr 25 13:10:03 +0000 2018
+text: Stocks near strong wedge-down pattern: $FSIC, $HWKN, $CFFN, $HUD
+time: Tue Apr 24 13:10:03 +0000 2018
+text: Stocks near strong wedge-down pattern: $FSIC, $HWKN, $ELF, $HUD
+time: Mon Apr 23 13:10:05 +0000 2018
+text: Hawkins $HWKN Earns Daily News Sentiment Rating of 0.11 https://t.co/WIY8xRnME7
+time: Mon Apr 23 11:14:41 +0000 2018

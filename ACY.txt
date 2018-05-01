@@ -1,0 +1,9 @@
+text: $ACY AeroCentury Corp. Daily Stock Price Summary
+From our Stock News Alerts App
+time: Wed Apr 25 22:37:23 +0000 2018
+text: $ACY AeroCentury Corp. Daily Stock Price Summary
+From our Stock News Alerts App
+time: Tue Apr 24 22:40:53 +0000 2018
+text: $ACY AeroCentury Corp. Daily Stock Price Summary
+From our Stock News Alerts App
+time: Mon Apr 23 22:39:27 +0000 2018

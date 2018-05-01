@@ -1,0 +1,10 @@
+text: Short vol percent for $CERN on 2018-04-24 is 65%. https://t.co/kxxv4afVEa $CPSI 44% $GE 50% $HMSY 54% $STRM 15%
+time: Wed Apr 25 23:36:03 +0000 2018
+text: HMS $HMSY Receives Media Sentiment Score of 0.08  https://t.co/pDmTGx5QtZ
+time: Wed Apr 25 12:50:03 +0000 2018
+text: HMS $HMSY Getting Somewhat Positive Press Coverage, Analysis Shows https://t.co/CDNoOUSH5W
+time: Wed Apr 25 12:49:07 +0000 2018
+text: Brokerages Anticipate HMS Holdings $HMSY Will Announce Quarterly Sales of $130.07 Million https://t.co/SI9yKsDf4J
+time: Mon Apr 23 10:27:56 +0000 2018
+text: Brokerages Anticipate HMS Holdings $HMSY Will Announce Quarterly Sales of $130.07 Million https://t.co/UVEZu7gvHj
+time: Mon Apr 23 06:59:43 +0000 2018

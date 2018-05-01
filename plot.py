@@ -49,7 +49,7 @@ def stock_vs_sentiment(stock_price, comments):
     combine_data = go.Figure(data=[bar_chart, line_chart], layout = layout)
     plot(combine_data, filename='combine')
 
-
+"""
 # examples
 pie_pos_neg(22,7)
 #pie_pos_neg_neu(20,7,12)
@@ -57,3 +57,5 @@ pie_pos_neg(22,7)
 stock_price = [100,300,600,400,200,400]
 comments = [1,3,6,4,2,4]
 stock_vs_sentiment(stock_price, comments)
+
+"""

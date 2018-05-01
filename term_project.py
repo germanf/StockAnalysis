@@ -18,6 +18,7 @@ import codecs
 import stock
 import predict
 import math
+import plot
 
 
 
@@ -495,6 +496,7 @@ def analyze(searched, date):
     except:
         nltk.download('punkt')
 
+
     try:
         sid = SentimentIntensityAnalyzer()
     except:
@@ -508,19 +510,28 @@ def analyze(searched, date):
             sentence_list.extend(tokenize.sent_tokenize(line))
     f.close()
     pos = 0
+    pos_count = 0
     neg = 0
+    neg_count = 0
+    neu_count = 0
     count = 0
     for sentence in sentence_list:
         count += 1
         ss = sid.polarity_scores(sentence)
         if (ss['compound'] > 0.0):
             pos += ss['compound']
+            pos_count+=1
         if (ss['compound'] < 0.0):
             neg += ss['compound']
+            neg_count+=1
+        if (ss['compound'] == 0.0):
+            neu_count += 1
         #print (ss)
     #print ("pos: ", pos)
     #print ("neg: ", neg)
     ratio = pos/(neg if neg != 0 else 0.001) if pos > neg else (neg/(pos if pos != 0 else 0.001))*-1
+    plot.pie_pos_neg(pos, neg * -1)
+    plot.pie_pos_neg_neu(pos_count, neg_count, neu_count)
     trainFeature = {}
     trainFeature["ratio"] = math.fabs(ratio)
     trainFeature["count"] = count
@@ -540,10 +551,15 @@ def train (symbol):
     search_stock_tweets(twitter_api, symbol, 1000, "2018-4-23", "2018-4-26")
     analyze( symbol, "2018-04-27")
 
-symbolsList = stock.GetSymbolsList()[150:200]
-print(symbolsList)
+#train("AAPL")
+predict.predictLastByLogisticRegression()
+predict.predictLastByRandomForest()
+"""
+symbolsList = stock.GetSymbolsList()[400:450]
 for i in symbolsList:
     train(i)
+"""
+
 
 #for key,value in sorted(sentim_analyzer.evaluate(test_set).items()):
 #    print('{0}: {1}'.format(key, value))

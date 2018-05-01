@@ -156,8 +156,6 @@ text: #estate asset watch - price / vol leaders:  $AMZN $FB $NFLX $AAPL $BA $NVD
 time: Wed Apr 25 18:58:08 +0000 2018
 text: $SQ after a 13 point correction is frinkin buy
 time: Wed Apr 25 18:44:53 +0000 2018
-text: $SQ: Comparing the growth rate of the last 5 years to the rate of the upcoming 2 years, we see that the growth ... https://t.co/jk5w1tGdXW https://t.co/u2TC3iUWwl
-time: Wed Apr 25 18:43:05 +0000 2018
 text: 5-star analyst Ivan Feinseth from Tigress Financial reiterated a Buy on $SQ.  https://t.co/9mr4Thq6Iv
 time: Wed Apr 25 18:42:23 +0000 2018
 text: $SQ Square recent pullback a buying opportunity, says Tigress Financial https://t.co/R195H0Z334
@@ -273,3 +271,7 @@ text: $SQ I doubt it goes green today
 time: Wed Apr 25 15:11:45 +0000 2018
 text: trend on $SQ holding up since Aug 2016, bought https://t.co/yLqeHgT2hQ
 time: Wed Apr 25 15:06:50 +0000 2018
+text: Thursday, April 26th 2018 - New Buy, Sell or Hold Ratings Issued For: 
+$IFXY $NGBL $TEAM $ILST $BKEN $NFLX $OCSY $SQ $ABX $HBRM $RSII $MRVL $DWDP $GM $BSX $PEP $CL $INFY $OAS $TEVA $DVN $AKS $WMT $BHGE $IBM $ERFB
+https://t.co/2247Qjmiwi
+time: Wed Apr 25 14:55:26 +0000 2018

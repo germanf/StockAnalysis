@@ -24,14 +24,17 @@ def SimpleTrain():
 def SimplePredict(filename, changeOverTime):
     trained = pickle.load(open(filename, 'rb'))
     probability = trained.predict_proba([(changeOverTime, 1)])
-    print ("probability: ", probability[0][1])
     return probability[0][1]
 
-def SentimentTrain():
+def SentimentTrain(until):
     features = []
     labels = []
+    count = 0
     with open("trainingSetWithSentiment2.txt") as set:
         for feature in set:
+            if (count > until):
+                break
+            count +=1
             FLDict = json.loads(feature)
             FT = (FLDict["count"], FLDict["ratio"], FLDict["simplePredictResult"])
             LT = FLDict["label"]
@@ -40,14 +43,18 @@ def SentimentTrain():
     pca = linear_model.LogisticRegression()
     pca.fit(features, labels)
 
-    filename = 'SentimentPredict.sav'
+    filename = 'SentimentPredict2.sav'
     pickle.dump(pca, open(filename, 'wb'))
 
-def SentimentRandomForestTrain():
+def SentimentRandomForestTrain(until):
     features = []
     labels = []
+    count = 0
     with open("trainingSetWithSentiment2.txt") as set:
         for feature in set:
+            if (count > until):
+                break
+            count += 1
             FLDict = json.loads(feature)
             FT = (FLDict["count"], FLDict["ratio"], FLDict["simplePredictResult"])
             LT = FLDict["label"]
@@ -56,17 +63,21 @@ def SentimentRandomForestTrain():
     pca = RandomForestClassifier()
     pca.fit(features, labels)
 
-    filename = 'SentimentRandomForestPredict3.sav'
+    filename = 'SentimentRandomForestPredict4.sav'
     pickle.dump(pca, open(filename, 'wb'))
 
 
 def Predict(filename, inputTuple):
     trained = pickle.load(open(filename, 'rb'))
     probability = trained.predict_proba([inputTuple])
-    print ("probability: ", probability[0][1])
+    #print ("probability of going up: ", probability[0][1])
     return (trained.predict([inputTuple]))
 
-
+def Probability(filename, inputTuple):
+    trained = pickle.load(open(filename, 'rb'))
+    probability = trained.predict_proba([inputTuple])
+    # print ("probability of going up: ", probability[0][1])
+    return probability
 def test(since):
     with open("trainingSetWithSentiment2.txt") as set:
         testF = []
@@ -77,9 +88,9 @@ def test(since):
             if (count >= since):
                 FLDict = json.loads(feature)
                 FT = (FLDict["count"]+1, FLDict["ratio"], FLDict["simplePredictResult"])
-                testF.append(Predict('SentimentPredict.sav', FT))
+                testF.append(1-Predict('SentimentPredict2.sav', FT))
                 testL.append(FLDict["label"])
-        print accuracy_score(testF, testL)
+        print "accuracy: ", accuracy_score(testF, testL)
 
 
 def testForest(since):
@@ -92,39 +103,46 @@ def testForest(since):
             if (count >= since):
                 FLDict = json.loads(feature)
                 FT = (FLDict["count"]+1, FLDict["ratio"], FLDict["simplePredictResult"])
-                testF.append(Predict('SentimentRandomForestPredict3.sav', FT))
+                testF.append(Predict('SentimentRandomForestPredict4.sav', FT))
                 testL.append(FLDict["label"])
-        print accuracy_score(testF, testL)
+        print "accuracy: ", accuracy_score(testF, testL)
 
-def predictLastByForest():
+def predictLastByRandomForest():
     with open("trainingSetWithSentiment2.txt") as set:
         lines = set.readlines()
         latestData = lines[-1]
         FLDict = json.loads(latestData)
         FT = (FLDict["count"] + 1, FLDict["ratio"], FLDict["simplePredictResult"])
-        predict_result = Predict('SentimentRandomForestPredict3.sav', FT)[0]
+        predict_result = Predict('SentimentRandomForestPredict4.sav', FT)[0]
+        probability_of_up = Probability('SentimentRandomForestPredict4.sav', FT)[0][1]
         if (predict_result == 1):
-            print ("Based on the history, this stock will go up at the next day")
+            print "Probability of going up is: ", probability_of_up
+            print ("Based on the history and Random Forest Algorithm, this stock will go up at the next day")
         else:
-            print ("Based on the history, this stock will go down at the next day")
+            print ("Probability of going up is: ", probability_of_up)
+            print ("Based on the history and Random Forest Algorithm, this stock will go down at the next day")
 
-def predictLastByLogisitcRegression():
+def predictLastByLogisticRegression():
     with open("trainingSetWithSentiment2.txt") as set:
         lines = set.readlines()
         latestData = lines[-1]
         FLDict = json.loads(latestData)
         FT = (FLDict["count"] + 1, FLDict["ratio"], FLDict["simplePredictResult"])
-        predict_result = Predict('SentimentRandomForestPredict3.sav', FT)[0]
+        predict_result = 1- Predict('SentimentPredict2.sav', FT)[0]
+        probability_of_up = Probability('SentimentPredict2.sav', FT)[0][0]
         if (predict_result == 1):
-            print ("Based on the history, this stock will go up at the next day")
+            print "Probability of going up is: ", probability_of_up
+            print ("Based on the history and Logistic Regression Algorithm, this stock will go up at the next day")
         else:
-            print ("Based on the history, this stock will go down at the next day")
+            print ("Probability of going up is: ", probability_of_up)
+            print ("Based on the history and Logistic Regression Algorithm, this stock will go down at the next day")
 
 
 
-#SentimentRandomForestTrain()
+#SentimentRandomForestTrain(150)
 #testForest(150)
-#SentimentTrain()
-#test(200)
+#SentimentTrain(400)
+#test(400)
 
-predictLastByForest()
+#predictLastByRandomForest()
+#predictLastByLogisticRegression()

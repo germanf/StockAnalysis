@@ -19,7 +19,7 @@ import stock
 import predict
 import math
 import plot
-
+from datetime import date
 
 
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -107,203 +107,7 @@ def make_twitter_request(twitter_api_func, max_errors=10, *args, **kw):
                 print >> sys.stderr, "Too many consecutive errors...bailing out."
                 raise
 
-"""
-Used to get user profile json (from cookbook)
 
-"""
-def get_user_profile(twitter_api, screen_names=None, user_ids=None):
-    # Must have either screen_name or user_id (logical xor)
-    assert (screen_names != None) != (user_ids != None), "Must have screen_names or user_ids, but not both"
-
-    items_to_info = {}
-
-    items = screen_names or user_ids
-
-    while len(items) > 0:
-
-        # Process 100 items at a time per the API specifications for /users/lookup.
-        # See https://dev.twitter.com/docs/api/1.1/get/users/lookup for details.
-
-        items_str = ','.join([str(item) for item in items[:100]])
-        items = items[100:]
-
-        if screen_names:
-            response = make_twitter_request(twitter_api.users.lookup,
-                                            screen_name=items_str)
-        else:  # user_ids
-            response = make_twitter_request(twitter_api.users.lookup,
-                                            user_id=items_str)
-        #if (response == None):
-        #    continue
-
-        for user_info in response:
-            if screen_names:
-                items_to_info[user_info['screen_name']] = user_info
-            else:  # user_ids
-                items_to_info[user_info['id']] = user_info
-
-    return items_to_info
-from collections import Counter
-
-def get_common_tweet_entities(statuses, entity_threshold=3):
-
-    # Create a flat list of all tweet entities
-    tweet_entities = [  e
-                        for status in statuses
-                            for entity_type in extract_tweet_entities([status])
-                                for e in entity_type
-                     ]
-
-    c = Counter(tweet_entities).most_common()
-
-    # Compute frequencies
-    return [ (k,v)
-             for (k,v) in c
-                 if v >= entity_threshold
-           ]
-
-
-def extract_tweet_entities(statuses):
-    # See https://dev.twitter.com/docs/tweet-entities for more details on tweet
-    # entities
-
-    if len(statuses) == 0:
-        return [], [], [], [], []
-
-    screen_names = [user_mention['screen_name']
-                    for status in statuses
-                    for user_mention in status['entities']['user_mentions']]
-
-    hashtags = [hashtag['text']
-                for status in statuses
-                for hashtag in status['entities']['hashtags']]
-
-    urls = [url['expanded_url']
-            for status in statuses
-            for url in status['entities']['urls']]
-
-    symbols = [symbol['text']
-               for status in statuses
-               for symbol in status['entities']['symbols']]
-
-    # In some circumstances (such as search results), the media entity
-    # may not appear
-    if 'media' in status['entities'].keys():
-        media = [media['url']
-                 for status in statuses
-                 for media in status['entities']['media']]
-    else:
-        media = []
-
-    return screen_names, hashtags, urls, media, symbols
-
-
-
-from functools import partial
-from sys import maxint
-def get_friends_followers_ids(twitter_api, screen_name=None, user_id=None,
-                              friends_limit=maxint, followers_limit=maxint):
-    # Must have either screen_name or user_id (logical xor)
-    assert (screen_name != None) != (user_id != None), "Must have screen_name or user_id, but not both"
-
-    # See https://dev.twitter.com/docs/api/1.1/get/friends/ids and
-    # https://dev.twitter.com/docs/api/1.1/get/followers/ids for details
-    # on API parameters
-
-    get_friends_ids = partial(make_twitter_request, twitter_api.friends.ids,
-                              count=5000)
-    get_followers_ids = partial(make_twitter_request, twitter_api.followers.ids,
-                                count=5000)
-
-    friends_ids, followers_ids = [], []
-
-    for twitter_api_func, limit, ids, label in [
-        [get_friends_ids, friends_limit, friends_ids, "friends"],
-        [get_followers_ids, followers_limit, followers_ids, "followers"]
-    ]:
-
-        if limit == 0: continue
-
-        cursor = -1
-        while cursor != 0:
-
-            # Use make_twitter_request via the partially bound callable...
-            if screen_name:
-                response = twitter_api_func(screen_name=screen_name, cursor=cursor)
-            else:  # user_id
-                response = twitter_api_func(user_id=user_id, cursor=cursor)
-
-            if response is not None:
-                ids += response['ids']
-                cursor = response['next_cursor']
-
-            print >> sys.stderr, 'Fetched {0} total {1} ids for {2}'.format(len(ids),
-                                                                            label, (user_id or screen_name))
-
-            # XXX: You may want to store data during each iteration to provide an
-            # an additional layer of protection from exceptional circumstances
-
-            if len(ids) >= limit or response is None:
-                break
-
-    # Do something useful with the IDs, like store them to disk...
-    return friends_ids[:friends_limit], followers_ids[:followers_limit]
-
-
-def analyze_tweet_content(statuses):
-    if len(statuses) == 0:
-        print "No statuses to analyze"
-        return
-
-    # A nested helper function for computing lexical diversity
-    def lexical_diversity(tokens):
-        return 1.0 * len(set(tokens)) / len(tokens)
-
-        # A nested helper function for computing the average number of words per tweet
-
-    def average_words(statuses):
-        total_words = sum([len(s.split()) for s in statuses])
-        return 1.0 * total_words / len(statuses)
-
-    status_texts = [status['text'] for status in statuses]
-    screen_names, hashtags, urls, media, _ = extract_tweet_entities(statuses)
-
-    # Compute a collection of all words from all tweets
-    words = [w
-             for t in status_texts
-             for w in t.split()]
-
-    print "Lexical diversity (words):", lexical_diversity(words)
-    print "Lexical diversity (screen names):", lexical_diversity(screen_names)
-    print "Lexical diversity (hashtags):", lexical_diversity(hashtags)
-    print "Averge words per tweet:", average_words(status_texts)
-
-def analyze_favorites(twitter_api, screen_name, entity_threshold=2):
-    # Could fetch more than 200 by walking the cursor as shown in other
-    # recipes, but 200 is a good sample to work with.
-    favs = twitter_api.favorites.list(screen_name=screen_name, count=200)
-    print "Number of favorites:", len(favs)
-
-    # Figure out what some of the common entities are, if any, in the content
-
-    common_entities = get_common_tweet_entities(favs,
-                                                entity_threshold=entity_threshold)
-
-    # Use PrettyTable to create a nice tabular display
-
-    pt = PrettyTable(field_names=['Entity', 'Count'])
-    [pt.add_row(kv) for kv in common_entities]
-    pt.align['Entity'], pt.align['Count'] = 'l', 'r'  # Set column alignment
-
-    print
-    print "Common entities in favorites..."
-    print pt
-
-    # Print out some other stats
-    print
-    print "Some statistics about the content of the favorities..."
-    print
-    analyze_tweet_content(favs)
 
 
 def twitter_search(twitter_api, q, max_results=200, **kw):
@@ -346,102 +150,12 @@ def twitter_search(twitter_api, q, max_results=200, **kw):
     return statuses
 
 
-def harvest_user_timeline(twitter_api, screen_name=None, user_id=None, max_results=1000):
-    assert (screen_name != None) != (user_id != None), "Must have screen_name or user_id, but not both"
 
-    kw = {  # Keyword args for the Twitter API call
-        'count': 200,
-        'trim_user': 'true',
-        'include_rts': 'true',
-        'since_id': 1
-    }
 
-    if screen_name:
-        kw['screen_name'] = screen_name
-    else:
-        kw['user_id'] = user_id
 
-    max_pages = 16
-    results = []
+""" Search the tweets that contain our stock symbol, and write the data mined to a file """
 
-    tweets = make_twitter_request(twitter_api.statuses.user_timeline, **kw)
 
-    if tweets is None:  # 401 (Not Authorized) - Need to bail out on loop entry
-        tweets = []
-
-    results += tweets
-
-    print >> sys.stderr, 'Fetched %i tweets' % len(tweets)
-
-    page_num = 1
-
-    # Many Twitter accounts have fewer than 200 tweets so you don't want to enter
-    # the loop and waste a precious request if max_results = 200.
-
-    # Note: Analogous optimizations could be applied inside the loop to try and
-    # save requests. e.g. Don't make a third request if you have 287 tweets out of
-    # a possible 400 tweets after your second request. Twitter does do some
-    # post-filtering on censored and deleted tweets out of batches of 'count', though,
-    # so you can't strictly check for the number of results being 200. You might get
-    # back 198, for example, and still have many more tweets to go. If you have the
-    # total number of tweets for an account (by GET /users/lookup/), then you could
-    # simply use this value as a guide.
-
-    if max_results == kw['count']:
-        page_num = max_pages  # Prevent loop entry
-
-    while page_num < max_pages and len(tweets) > 0 and len(results) < max_results:
-        # Necessary for traversing the timeline in Twitter's v1.1 API:
-        # get the next query's max-id parameter to pass in.
-        # See https://dev.twitter.com/docs/working-with-timelines.
-        kw['max_id'] = min([tweet['id'] for tweet in tweets]) - 1
-
-        tweets = make_twitter_request(twitter_api.statuses.user_timeline, **kw)
-        results += tweets
-
-        print >> sys.stderr, 'Fetched %i tweets' % (len(tweets),)
-
-        page_num += 1
-
-    print >> sys.stderr, 'Done fetching tweets'
-
-    return results[:max_results]
-
-twitter_api = oauth_login()
-#screen_name = "EAFay23"
-#profile = get_user_profile(twitter_api, [screen_name])
-#print (json.dumps(profile, indent = 1))
-#analyze_favorites(twitter_api, screen_name)
-"""
-url = ("https://api.iextrading.com/1.0/stock/aapl/previous")
-rep = requests.get(url)
-sdata = rep.json()
-print (json.dumps(sdata,indent = 1))
-
-"""
-def havest_user_stock_tweet(stock_name,user_name,result_limit, key_word):
-	time_of_tweet=""
-	stock_tweets = harvest_user_timeline(twitter_api, screen_name=user_name,max_results=result_limit,)
-	### open file and test output
-	for x in stock_tweets:
-		if ('full_text' in x.keys()):
-			if(key_word in x['full_text']):
-				time=x['created_at']
-				time_of_tweet=time[4:11]+time[len-4:len]
-				with open(time_of_tweet + ".txt", 'a+') as k:
-				    k.write("text: " + x['full_text'].encode('utf-8') + "\n")
-		else:
-			if(key_word in x['text']):
-				time = x['created_at']
-				time_of_tweet = time[4:11] + time[len(time) - 4:len(time)]
-				with open(time_of_tweet + ".txt", 'a+') as k:
-				    k.write("text: " + x['text'].encode('utf-8') + "\n")
-"""
-user_name="HIDEO_KOJIMA_EN"
-result_limit=200
-key_word="DEATH STRANDING"
-havest_user_stock_tweet(key_word,user_name,result_limit)
-"""
 def search_stock_tweets(twitter_api, searched, max_results, since, until):
     r = twitter_search(twitter_api, "$" + searched, max_results= max_results, result_type = 'mixed', lang = 'en', since= since, until= until, tweet_mode="extended" )
     with open(searched + ".txt", 'w+') as f:
@@ -455,56 +169,26 @@ def search_stock_tweets(twitter_api, searched, max_results, since, until):
 
 
 
-### open file and out put.
+""" Analyze the stock symbol by collecting the features we need and put them into our machine """
 
-"""
-
-"""
-        
-
-
-"""
-
-
-history = harvest_user_timeline(twitter_api, screen_name= "jimcramer", max_results= 200)
-print (json.dumps(history, indent = 1))
-"""
-"""
-nltk.download('subjectivity')
-n_instances = 100
-subj_docs = [(sent, 'subj') for sent in subjectivity.sents(categories='subj')[:n_instances]]
-obj_docs = [(sent, 'obj') for sent in subjectivity.sents(categories='obj')[:n_instances]]
-train_subj_docs = subj_docs[:80]
-test_subj_docs = subj_docs[80:100]
-train_obj_docs = obj_docs[:80]
-test_obj_docs = obj_docs[80:100]
-training_docs = train_subj_docs+train_obj_docs
-testing_docs = test_subj_docs+test_obj_docs
-sentim_analyzer = SentimentAnalyzer()
-all_words_neg = sentim_analyzer.all_words([mark_negation(doc) for doc in training_docs])
-unigram_feats = sentim_analyzer.unigram_word_feats(all_words_neg, min_freq=4)
-sentim_analyzer.add_feat_extractor(extract_unigram_feats, unigrams=unigram_feats)
-training_set = sentim_analyzer.apply_features(training_docs)
-test_set = sentim_analyzer.apply_features(testing_docs)
-trainer = NaiveBayesClassifier.train
-classifier = sentim_analyzer.train(trainer, training_set)
-"""
 
 def analyze(searched, date):
+
+    """ Download what we need """
     try:
         tokenize.sent_tokenize("")
     except:
         nltk.download('punkt')
 
-
     try:
         sid = SentimentIntensityAnalyzer()
     except:
         nltk.download('vader_lexicon')
-
         sid = SentimentIntensityAnalyzer()
+
     sentence_list = []
-    f= codecs.open(searched+'.txt', encoding='utf-8')
+    """ Open the file that stores the tweets we mined """
+    f = codecs.open(searched+'.txt', encoding='utf-8')
     for line in f:
         if(line.startswith("text:")):
             sentence_list.extend(tokenize.sent_tokenize(line))
@@ -515,6 +199,8 @@ def analyze(searched, date):
     neg_count = 0
     neu_count = 0
     count = 0
+
+    """ Analyze sentiment """
     for sentence in sentence_list:
         count += 1
         ss = sid.polarity_scores(sentence)
@@ -526,27 +212,42 @@ def analyze(searched, date):
             neg_count+=1
         if (ss['compound'] == 0.0):
             neu_count += 1
-        #print (ss)
-    #print ("pos: ", pos)
-    #print ("neg: ", neg)
+
+    """ Calculate the ratio """
     ratio = pos/(neg if neg != 0 else 0.001) if pos > neg else (neg/(pos if pos != 0 else 0.001))*-1
-    plot.pie_pos_neg(pos, neg * -1)
-    plot.pie_pos_neg_neu(pos_count, neg_count, neu_count)
+
+    """ 
+    Process the data that we have and transform them into features
+        We have three features: 
+        1. ratio of positive and negative tweets, 
+        2. count of tweets that are talking about this stock,
+        3. probability of going up predicted by "simple predict" machine, which is
+        predicting only based on the history stock price data. 
+    """
     trainFeature = {}
     trainFeature["ratio"] = math.fabs(ratio)
     trainFeature["count"] = count
     change = stock.GetPriceChangeOnDate(searched, date)
-    #print ("change: ", change)
+
+    """ 1 means go up, 0 means go down """
     trainFeature["label"] = 1 if change > 0 else 0
     priceChangedOverFiveDays = stock.GetPriceChangedOverFiveDays(searched, date)
+
+    """ Get prediction result from "simple predict" machine """
     simple_predict_result = predict.SimplePredict("simplePredict.sav", priceChangedOverFiveDays) - 0.5
     trainFeature["simplePredictResult"] = simple_predict_result
 
+    """ Input to our data set """
     with open('trainingSetWithSentiment2.txt', 'a+') as out:
         json.dump(trainFeature, out)
         out.write("\n")
 
+
+""" Similar to function analyze, but we remove some lines of code for easy to demo """
+
 def predictStock(searched, date):
+
+    """ Download what we need """
     try:
         tokenize.sent_tokenize("")
     except:
@@ -557,17 +258,22 @@ def predictStock(searched, date):
         nltk.download('vader_lexicon')
         sid = SentimentIntensityAnalyzer()
     sentence_list = []
+
+    """ Open the file that stores the tweets we mined """
     f= codecs.open(searched+'.txt', encoding='utf-8')
     for line in f:
         if(line.startswith("text:")):
             sentence_list.extend(tokenize.sent_tokenize(line))
     f.close()
+
     pos = 0
     pos_count = 0
     neg = 0
     neg_count = 0
     neu_count = 0
     count = 0
+
+    """ Analyze sentiment """
     for sentence in sentence_list:
         count += 1
         ss = sid.polarity_scores(sentence)
@@ -579,55 +285,70 @@ def predictStock(searched, date):
             neg_count+=1
         if (ss['compound'] == 0.0):
             neu_count += 1
-        #print (ss)
-    #print ("pos: ", pos)
-    #print ("neg: ", neg)
+
+    """ Calculate the ratio """
     ratio = pos/(neg if neg != 0 else 0.001) if pos > neg else (neg/(pos if pos != 0 else 0.001))*-1
     plot.pie_pos_neg(pos, neg * -1)
     plot.pie_pos_neg_neu(pos_count, neg_count, neu_count)
+
+    """ 
+    Process the data that we have and transform them into features
+        We have three features: 
+        1. ratio of positive and negative tweets, 
+        2. count of tweets that are talking about this stock,
+        3. probability of going up predicted by "simple predict" machine, which is
+        predicting only based on the history stock price data. 
+    """
     trainFeature = {}
     trainFeature["ratio"] = math.fabs(ratio)
     trainFeature["count"] = count
     priceChangedOverFiveDays = stock.GetPriceChangedOverFiveDays(searched, date)
     simple_predict_result = predict.SimplePredict("simplePredict.sav", priceChangedOverFiveDays) - 0.5
     trainFeature["simplePredictResult"] = simple_predict_result
-    with open('trainingSetWithSentiment2.txt', 'a+') as out:
+    with open('trainingSetFromUserInput.txt', 'a+') as out:
         json.dump(trainFeature, out)
         out.write("\n")
     inputTuple = (trainFeature['count'], trainFeature['ratio'], trainFeature['simplePredictResult'])
-    predict.RandonForestPredict(inputTuple)
+    predict.RandomForestPredict(inputTuple)
     predict.LogisticRegressionPredict(inputTuple)
 
 
+""" Train function that we used to train our machine"""
 def train(symbol):
-    search_stock_tweets(twitter_api, symbol, 1000, "2018-4-26", "2018-4-29")
-    analyze(symbol, "2018-04-30")
+    search_stock_tweets(twitter_api, symbol, 1000, "2018-5-1", "2018-5-3")
+    analyze(symbol, "2018-05-04")
 
-def predictStockByDate():
 
-#train("AAPL")
-#predict.predictLastByLogisticRegression()
-#predict.predictLastByRandomForest()
-
-start, end = stock.GetPeriodDate(2018, 4, 30)
-current = stock.GetCurrentDate(2018,4,30)
-print (start, end)
-print (current)
-
-#symbolsList = stock.GetSymbolsList()[450:500]
-#for i in symbolsList:
-    #train(i)
+"""Predict the stock price today just for easy to demo our project"""
+def predictStockToday(symbol):
+    currentDay = date.today()
+    year = currentDay.timetuple().tm_year
+    month = currentDay.timetuple().tm_mon
+    day = currentDay.timetuple().tm_mday
+    start, end = stock.GetPeriodDate(year, month, day)
+    current = stock.GetCurrentDate(year, month, day)
+    search_stock_tweets(twitter_api=twitter_api, searched=symbol, max_results=1000, since=start, until=end)
+    predictStock(symbol, current)
 
 
 
-#for key,value in sorted(sentim_analyzer.evaluate(test_set).items()):
-#    print('{0}: {1}'.format(key, value))
-#print (json.dumps(r, indent = 1))
-"""
-fig = plt.figure()
-plt.show()
-"""
-'''
-input: a user name
-output: text\n time\n
-'''
+if __name__ == "__main__":
+
+    """ Login twitter api"""
+    twitter_api = oauth_login()
+
+    """Get All Symbols from IEX_API"""
+    symbols = stock.GetSymbolsList()
+
+    """ Instruction: Input the symbol of stock you want to predict (e.g.: MSFT) 
+        Since the accuracy of RandomForest is higher, when Random forest algorithm
+        predict the stock will go up or go down but the probability predicted by 
+        logistic regression is around 50, then please follow the prediction made by 
+        Random forest algorithm
+    """
+    user_input = raw_input("Please input a symbol that you want to predict for tomorrow")
+
+    if (user_input in symbols):
+        predictStockToday(user_input)
+    else :
+        print ("The symbol you typed is not available")

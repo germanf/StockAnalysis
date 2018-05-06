@@ -5,6 +5,13 @@ import time
 from datetime import timedelta
 import json
 
+
+""" The class is used to process and collect stock data """
+
+
+""" Get price of a stock now """
+
+
 def GetPrice(s):
     link = "/"
     seq = ("https://api.iextrading.com/1.0/stock", s, "price")
@@ -12,6 +19,12 @@ def GetPrice(s):
     response = requests.get(url)
     data = response.json()
     return data
+
+
+""" Get period of time when we need to mine for tweets (over 3 days)
+    For example, if the input is 2018-5-4, the out put is 2018-5-1,
+    2018-5-4, which means from 2018-5-1 to 2018-5-4
+"""
 
 def GetPeriodDate(y, m, d):
     datetime = date(y,m,d)
@@ -23,8 +36,14 @@ def GetPeriodDate(y, m, d):
     endDate = str(end.timetuple().tm_year) + "-" + str(end.timetuple().tm_mon) + "-" + str(end.timetuple().tm_mday)
     return startDate, endDate
 
+
+""" Translate the date into a format that accepted by search_tweets """
+
 def GetCurrentDate(y, m, d):
     return "{}-{:02d}-{}".format(y,m,d)
+
+
+""" Get the price changed percent on one day """
 
 def GetPriceChangeOnDate(s,date):
     link = "/"
@@ -36,6 +55,9 @@ def GetPriceChangeOnDate(s,date):
         if (i["date"] == date):
             return i["changePercent"]
     return None
+
+
+""" Get the price changed percent over five days """
 
 def GetPriceChangedOverFiveDays(s, date):
     link = "/"
@@ -50,6 +72,9 @@ def GetPriceChangedOverFiveDays(s, date):
                 priceChanged+=data[j]["changePercent"]
     return priceChanged
 
+
+""" Get all stock symbols """
+
 def GetAllStockSymbol():
     url = "https://api.iextrading.com/1.0/tops"
     response = requests.get(url)
@@ -59,6 +84,9 @@ def GetAllStockSymbol():
             json.dump(item, f)
             f.write("\n")
 
+
+""" Put all symbols in this file into a list """
+
 def GetSymbolsList():
     symbol = []
     with open ("Stock.txt", "r") as f:
@@ -66,6 +94,8 @@ def GetSymbolsList():
             symbol.append(json.loads(row)["symbol"])
     return symbol
 
+
+""" Get the price changed over a year (for simple predict machine) """
 
 def GetYearPrice(s):
     link = "/"
@@ -75,6 +105,9 @@ def GetYearPrice(s):
     data = response.json()
     with open(s+'prices.json', 'w') as outfile:
         json.dump(data, outfile)
+
+
+""" Prepare the training set for simple predict machine """
 
 def analyze(name):
     prices = json.load(open(name + 'prices.json'))

@@ -73,6 +73,28 @@ def Predict(filename, inputTuple):
     #print ("probability of going up: ", probability[0][1])
     return (trained.predict([inputTuple]))
 
+def RandonForestPredict(inputTuple):
+    trained = pickle.load(open("SentimentRandomForestPredict4.sav", 'rb'))
+    probability = trained.predict_proba([inputTuple])[0][1]
+    predict_result = trained.predict([inputTuple])
+    if (predict_result == 1):
+        print "Probability of going up is: ", probability
+        print ("Based on the history and Random Forest Algorithm, this stock will go up at the next day")
+    else:
+        print ("Probability of going up is: ", probability)
+        print ("Based on the history and Random Forest Algorithm, this stock will go down at the next day")
+
+def LogisticRegressionPredict(inputTuple):
+    trained = pickle.load(open("SentimentPredict2.sav", 'rb'))
+    probability = trained.predict_proba([inputTuple])[0][1]
+    predict_result = trained.predict([inputTuple])
+    if (predict_result == 1):
+        print "Probability of going up is: ", probability
+        print ("Based on the history and Logistic Regression Algorithm, this stock will go up at the next day")
+    else:
+        print ("Probability of going up is: ", probability)
+        print ("Based on the history and Logistic Regression Algorithm, this stock will go down at the next day")
+
 def Probability(filename, inputTuple):
     trained = pickle.load(open(filename, 'rb'))
     probability = trained.predict_proba([inputTuple])
@@ -88,7 +110,7 @@ def test(since):
             if (count >= since):
                 FLDict = json.loads(feature)
                 FT = (FLDict["count"]+1, FLDict["ratio"], FLDict["simplePredictResult"])
-                testF.append(1-Predict('SentimentPredict2.sav', FT))
+                testF.append(Predict('SentimentPredict2.sav', FT))
                 testL.append(FLDict["label"])
         print "accuracy: ", accuracy_score(testF, testL)
 
@@ -128,8 +150,8 @@ def predictLastByLogisticRegression():
         latestData = lines[-1]
         FLDict = json.loads(latestData)
         FT = (FLDict["count"] + 1, FLDict["ratio"], FLDict["simplePredictResult"])
-        predict_result = 1- Predict('SentimentPredict2.sav', FT)[0]
-        probability_of_up = Probability('SentimentPredict2.sav', FT)[0][0]
+        predict_result = Predict('SentimentPredict2.sav', FT)[0]
+        probability_of_up = Probability('SentimentPredict2.sav', FT)[0][1]
         if (predict_result == 1):
             print "Probability of going up is: ", probability_of_up
             print ("Based on the history and Logistic Regression Algorithm, this stock will go up at the next day")
@@ -140,9 +162,9 @@ def predictLastByLogisticRegression():
 
 
 #SentimentRandomForestTrain(150)
-#testForest(150)
-#SentimentTrain(400)
-#test(400)
+#testForest(400)
+#SentimentTrain(200)
+#test(200)
 
 #predictLastByRandomForest()
 #predictLastByLogisticRegression()

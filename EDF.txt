@@ -1,0 +1,2 @@
+text: #France Stocks: Auto $UG-2.1%.Infra $DG+1%.Logistics $BOL-8.5%.Entertain $ECP+3.5%.Mining $ERA+2.2%.Testing/Lab Health $ERF-5.9%.Video Game $BIG+6.1%.Realty $MERY+2.4%.Agriculture $RIN-16.3%.Telecom $ILD-2%. Media TV $MMT-2.2%.Retail $FNAC-2.2%.BFS $RF-0.60% $CNP-0.83%. $EDF+1.1%
+time: Tue Apr 24 11:18:02 +0000 2018

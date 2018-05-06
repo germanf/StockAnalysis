@@ -1,0 +1,2 @@
+text: Stocks with strong double-bottom pattern: $SBB, $REG, $IBDK, $DTF
+time: Tue Apr 24 13:20:03 +0000 2018

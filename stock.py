@@ -23,6 +23,9 @@ def GetPeriodDate(y, m, d):
     endDate = str(end.timetuple().tm_year) + "-" + str(end.timetuple().tm_mon) + "-" + str(end.timetuple().tm_mday)
     return startDate, endDate
 
+def GetCurrentDate(y, m, d):
+    return "{}-{:02d}-{}".format(y,m,d)
+
 def GetPriceChangeOnDate(s,date):
     link = "/"
     seq = ("https://api.iextrading.com/1.0/stock", s, "chart/1y")

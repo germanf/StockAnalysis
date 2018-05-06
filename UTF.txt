@@ -1,0 +1,2 @@
+text: Just opened a partial position in $UTF and added to my position in $EXG. Creating my own pension.
+time: Wed Apr 25 14:26:26 +0000 2018

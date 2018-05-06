@@ -1,0 +1,9 @@
+text: Buy picks for 04-23:  
+$CNS, 
+$PBCT, 
+$AGM, 
+$FNWB, 
+$BRK/B, 
+$OPOF.  
+Last updated: 04-22 09:01PM
+time: Mon Apr 23 12:30:03 +0000 2018

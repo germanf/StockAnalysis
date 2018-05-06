@@ -1,0 +1,11 @@
+text: $XJO +0.6%, 35pts, 5921
+Large Cap Gainers
+$CIA +8.26%
+$MOE +6.86%
+$NHC +4.48%
+Large Cap Losers
+$S32 -9.6%
+$BLD -8.63%
+$RSG -7.2%
+#ASX #ausbiz #tradingday
+time: Tue Apr 24 06:14:13 +0000 2018

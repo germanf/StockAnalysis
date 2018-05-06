@@ -546,19 +546,78 @@ def analyze(searched, date):
         json.dump(trainFeature, out)
         out.write("\n")
 
+def predictStock(searched, date):
+    try:
+        tokenize.sent_tokenize("")
+    except:
+        nltk.download('punkt')
+    try:
+        sid = SentimentIntensityAnalyzer()
+    except:
+        nltk.download('vader_lexicon')
+        sid = SentimentIntensityAnalyzer()
+    sentence_list = []
+    f= codecs.open(searched+'.txt', encoding='utf-8')
+    for line in f:
+        if(line.startswith("text:")):
+            sentence_list.extend(tokenize.sent_tokenize(line))
+    f.close()
+    pos = 0
+    pos_count = 0
+    neg = 0
+    neg_count = 0
+    neu_count = 0
+    count = 0
+    for sentence in sentence_list:
+        count += 1
+        ss = sid.polarity_scores(sentence)
+        if (ss['compound'] > 0.0):
+            pos += ss['compound']
+            pos_count+=1
+        if (ss['compound'] < 0.0):
+            neg += ss['compound']
+            neg_count+=1
+        if (ss['compound'] == 0.0):
+            neu_count += 1
+        #print (ss)
+    #print ("pos: ", pos)
+    #print ("neg: ", neg)
+    ratio = pos/(neg if neg != 0 else 0.001) if pos > neg else (neg/(pos if pos != 0 else 0.001))*-1
+    plot.pie_pos_neg(pos, neg * -1)
+    plot.pie_pos_neg_neu(pos_count, neg_count, neu_count)
+    trainFeature = {}
+    trainFeature["ratio"] = math.fabs(ratio)
+    trainFeature["count"] = count
+    priceChangedOverFiveDays = stock.GetPriceChangedOverFiveDays(searched, date)
+    simple_predict_result = predict.SimplePredict("simplePredict.sav", priceChangedOverFiveDays) - 0.5
+    trainFeature["simplePredictResult"] = simple_predict_result
+    with open('trainingSetWithSentiment2.txt', 'a+') as out:
+        json.dump(trainFeature, out)
+        out.write("\n")
+    inputTuple = (trainFeature['count'], trainFeature['ratio'], trainFeature['simplePredictResult'])
+    predict.RandonForestPredict(inputTuple)
+    predict.LogisticRegressionPredict(inputTuple)
 
-def train (symbol):
-    search_stock_tweets(twitter_api, symbol, 1000, "2018-4-23", "2018-4-26")
-    analyze( symbol, "2018-04-27")
+
+def train(symbol):
+    search_stock_tweets(twitter_api, symbol, 1000, "2018-4-26", "2018-4-29")
+    analyze(symbol, "2018-04-30")
+
+def predictStockByDate():
 
 #train("AAPL")
-predict.predictLastByLogisticRegression()
-predict.predictLastByRandomForest()
-"""
-symbolsList = stock.GetSymbolsList()[400:450]
-for i in symbolsList:
-    train(i)
-"""
+#predict.predictLastByLogisticRegression()
+#predict.predictLastByRandomForest()
+
+start, end = stock.GetPeriodDate(2018, 4, 30)
+current = stock.GetCurrentDate(2018,4,30)
+print (start, end)
+print (current)
+
+#symbolsList = stock.GetSymbolsList()[450:500]
+#for i in symbolsList:
+    #train(i)
+
 
 
 #for key,value in sorted(sentim_analyzer.evaluate(test_set).items()):

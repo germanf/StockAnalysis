@@ -15,3 +15,12 @@
 {"count": 25, "ratio": 1.9020366073730344, "simplePredictResult": 0.039034037605431005}
 {"count": 145, "ratio": 2.457143638177768, "simplePredictResult": 0.039034037605431005}
 {"count": 144, "ratio": 2.7253016050370675, "simplePredictResult": 0.039034037605431005}
+{"count": 150, "ratio": 6.675782996292106, "simplePredictResult": 0.039034037605431005}
+{"count": 149, "ratio": 6.575380650590368, "simplePredictResult": 0.039034037605431005}
+{"count": 142, "ratio": 1.7702450342368854, "simplePredictResult": 0.039034037605431005}
+{"count": 102, "ratio": 12.60209503567633, "simplePredictResult": 0.039034037605431005}
+{"count": 27, "ratio": 3839.9, "simplePredictResult": 0.039034037605431005}
+{"count": 15, "ratio": 1587.9, "simplePredictResult": 0.039034037605431005}
+{"count": 5, "ratio": 546.4, "simplePredictResult": 0.039034037605431005}
+{"count": 11, "ratio": 4.409224011713031, "simplePredictResult": 0.039034037605431005}
+{"count": 6, "ratio": 296.0, "simplePredictResult": 0.039034037605431005}

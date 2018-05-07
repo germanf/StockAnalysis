@@ -2,18 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="725cdcaa-258b-4c63-9ee7-a27db0648ea7" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/README.txt" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/AAPL.txt" afterPath="$PROJECT_DIR$/AAPL.txt" />
-      <change beforePath="$PROJECT_DIR$/AMD.txt" afterPath="$PROJECT_DIR$/AMD.txt" />
-      <change beforePath="$PROJECT_DIR$/LIVX.txt" afterPath="$PROJECT_DIR$/LIVX.txt" />
-      <change beforePath="$PROJECT_DIR$/LNN.txt" afterPath="$PROJECT_DIR$/LNN.txt" />
-      <change beforePath="$PROJECT_DIR$/MSFT.txt" afterPath="$PROJECT_DIR$/MSFT.txt" />
-      <change beforePath="$PROJECT_DIR$/OPY.txt" afterPath="$PROJECT_DIR$/OPY.txt" />
-      <change beforePath="$PROJECT_DIR$/SNCR.txt" afterPath="$PROJECT_DIR$/SNCR.txt" />
-      <change beforePath="$PROJECT_DIR$/TECK.txt" afterPath="$PROJECT_DIR$/TECK.txt" />
-      <change beforePath="$PROJECT_DIR$/temp-plot.html" afterPath="$PROJECT_DIR$/temp-plot.html" />
-      <change beforePath="$PROJECT_DIR$/trainingSetFromUserInput.txt" afterPath="$PROJECT_DIR$/trainingSetFromUserInput.txt" />
+      <change beforePath="$PROJECT_DIR$/README.txt" afterPath="$PROJECT_DIR$/README.txt" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -63,8 +53,8 @@
       <file leaf-file-name="README.txt" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/README.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="47" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="301" />
+            <state relative-caret-position="15">
+              <caret line="1" column="60" lean-forward="false" selection-start-line="1" selection-start-column="60" selection-end-line="1" selection-end-column="60" />
               <folding />
             </state>
           </provider>
@@ -321,7 +311,14 @@
       <option name="project" value="LOCAL" />
       <updated>1525153458786</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Complete">
+      <created>1525662273094</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1525662273094</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -354,7 +351,8 @@
     <MESSAGE value="machine learning" />
     <MESSAGE value="UPDATE FILES AND MACHINE LEARNING" />
     <MESSAGE value="DRAFT VERSION" />
-    <option name="LAST_COMMIT_MESSAGE" value="DRAFT VERSION" />
+    <MESSAGE value="Complete" />
+    <option name="LAST_COMMIT_MESSAGE" value="Complete" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -772,8 +770,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/README.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="47" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="301" />
+        <state relative-caret-position="15">
+          <caret line="1" column="60" lean-forward="false" selection-start-line="1" selection-start-column="60" selection-end-line="1" selection-end-column="60" />
           <folding />
         </state>
       </provider>
